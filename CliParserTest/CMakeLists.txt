@@ -14,4 +14,5 @@ target_compile_options(${PROJECT_NAME} PRIVATE
           /W4 /WX /EHsc>)
 
 target_sources(${PROJECT_NAME} PRIVATE 
+src/main.cpp
 )
