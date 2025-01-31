@@ -14,5 +14,8 @@ target_compile_options(${PROJECT_NAME} PRIVATE
           /W4 /WX /EHsc>)
 
 target_sources(${PROJECT_NAME} PRIVATE 
-src/main.cpp
-)
+    src/main.cpp
+    src/Option.test.cpp
+    src/ArgParse.test.cpp
+    src/CommandRegistry.test.cpp
+ "src/CliParser.test.cpp")
