@@ -11,19 +11,30 @@ namespace CliParser {
 	}
 
 	int Run(const std::vector<std::string>& args, std::ostream& outErrors) {
-		if(args.empty()) {
-			outErrors << "No command specified";
-			return 1;
-		}
-		const auto& commandName = args[0];
+		const auto& commandName = [&args]() -> std::string {
+			if (args.empty() || args[0][0] == '-' || args[0][0] == '/') {
+				return "";
+			}
+			return args[0];
+		}();
+
 		auto& commands = GetCommands();
 		if (!commands.contains(commandName)) {
-			outErrors << "Unknown command: " << commandName;
+			if(commandName.empty()) {
+				outErrors << "No command specified and default command not set";
+			} else {
+				outErrors << "Unknown command: " << commandName;
+			}
 			return 1;
 		}
 		auto& command = commands.at(commandName);
 		auto argParser = GetArgParsers().at(commandName)();
-		auto remainingArgs = std::vector<std::string_view>(args.begin() + 1, args.end());
+		const auto remainingArgs = [&args, &commandName]() -> std::vector<std::string_view> {
+			if(commandName.empty()) {
+				return std::vector<std::string_view>(args.begin(), args.end());
+			}
+			return std::vector<std::string_view>(args.begin() + 1, args.end());
+		}();
 		if (!argParser->TryParse(remainingArgs, outErrors)) {
 			return 1;
 		}

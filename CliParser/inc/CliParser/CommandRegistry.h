@@ -41,4 +41,7 @@ void _name(const _argType& _argName, int& outResult); \
 CliParser::CommandRegistrar<_argType> _name##Registrar(#_name, _name); \
 void _name(const _argType& _argName, int& outResult)
 
-//TODO: Define a default command macro (command with no name)
+#define DEFAULT_COMMAND(_argType, _argName) \
+void defaultCommand(const _argType& _argName, int& outResult); \
+CliParser::CommandRegistrar<_argType> defaultCommandRegistrar("", defaultCommand); \
+void defaultCommand(const _argType& _argName, int& outResult)

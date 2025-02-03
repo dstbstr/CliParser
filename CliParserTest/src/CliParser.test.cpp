@@ -6,6 +6,8 @@
 #include <ranges>
 
 namespace CliParser {
+	struct EmptyArgs : IArgs {};
+
 	struct Command1Args : IArgs {
 		OPTION(std::string, 's', str, Required::True, "An example string");
 		OPTION(int, 'i', num, Required::False, "An example number", 42);
@@ -16,6 +18,10 @@ namespace CliParser {
 		OPTION(char, 'c', character, Required::False, "An example character", 'a');
 	};
 
+	struct DefaultArgs : IArgs {
+		OPTION(int, 'r', result, Required::True, "The result of the command", 0);
+	};
+
 	COMMAND(Command1, Command1Args, args) {
 		if(args.num != 42) {
 			outResult = static_cast<int>(args.str.size());
@@ -23,6 +29,13 @@ namespace CliParser {
 	}
 	COMMAND(Command2, Command2Args, args) {
 		outResult = static_cast<int>(args.character);
+	}
+	COMMAND(EmptyCommand, EmptyArgs, args) {
+		outResult = 42;
+		(void)args;
+	}
+	DEFAULT_COMMAND(DefaultArgs, args) {
+		outResult = args.result;
 	}
 
 	struct CliParserTest : public ::testing::Test {
@@ -86,5 +99,18 @@ namespace CliParser {
 		auto result = CliParser::Run(Args, Errors);
 		ASSERT_NE(result, SuccessCode);
 		ASSERT_FALSE(Errors.str().empty());
+	}
+
+	TEST_F(CliParserTest, Run_WithDefaultCommand_IsSuccess) {
+		MakeArgs("-r 42");
+		auto result = CliParser::Run(Args, Errors);
+		ASSERT_EQ(result, 42);
+	}
+
+	TEST_F(CliParserTest, Run_EmptyCommand_IsSuccess) {
+		MakeArgs("EmptyCommand");
+		auto result = CliParser::Run(Args, Errors);
+		ASSERT_EQ(result, 42);
+		ASSERT_TRUE(Errors.str().empty());
 	}
 }
