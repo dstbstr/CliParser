@@ -135,9 +135,9 @@ private: \
 		#_long_name, \
 		_required, \
 		_helpText, \
-		static_cast<DefaultValueFunc<_type>>(CliParser::ArgParse::ToString), \
+		static_cast<CliParser::DefaultValueFunc<_type>>(CliParser::ArgParse::ToString), \
 		_long_name, \
-		static_cast<ArgParseFunc<_type>>(CliParser::ArgParse::TryParse), \
+		static_cast<CliParser::ArgParseFunc<_type>>(CliParser::ArgParse::TryParse), \
 		_limitedFunc, \
 		_customValidator\
  	}; \
