@@ -1,4 +1,38 @@
 #include "CliParser/CliParser.h"
+#include <algorithm>
+#include <ranges>
+
+namespace {
+	bool NeedsHelp(const std::vector<std::string>& args) {
+		return std::any_of(args.begin(), args.end(), [](const auto& arg) {
+			return arg == "-h" || arg.rfind("help") != arg.npos;
+		});
+	}
+
+	void ShowHelp(const std::vector<std::string>& args, std::ostream& outStream) {
+		auto PrintKnownCommands = [&outStream]() {
+			const auto commands = CliParser::GetCommandNames();
+			auto commandStr = commands 
+				| std::views::transform([](const std::string& s) { return s == "" ? "<default>" : s; })
+				| std::views::join_with('\n') 
+				| std::ranges::to<std::string>();
+			outStream << "Available commands:\n" << commandStr << std::flush;
+		};
+		if(args.empty()) {
+			PrintKnownCommands();
+		} else {
+			auto commandName = args[0];
+			if (commandName == "default" || commandName == "empty") commandName = "";
+			auto& parsers = CliParser::GetArgParsers();
+			if(parsers.contains(commandName)) {
+				auto& parser = parsers.at(commandName);
+				outStream << parser()->Describe() << std::flush;
+			} else {
+				PrintKnownCommands();
+			}
+		}
+	}
+}
 
 namespace CliParser {
 	int Run(int argc, char* argv[], std::ostream& outErrors) {
@@ -11,6 +45,11 @@ namespace CliParser {
 	}
 
 	int Run(const std::vector<std::string>& args, std::ostream& outErrors) {
+		if(NeedsHelp(args)) {
+			ShowHelp(args, outErrors);
+			return 0;
+		}
+
 		const auto& commandName = [&args]() -> std::string {
 			if (args.empty() || args[0][0] == '-' || args[0][0] == '/') {
 				return "";
