@@ -90,7 +90,8 @@ namespace CliParser {
 			}
 		}
 
-		auto missingRequired = Options | std::views::filter([](const auto& op) { return op->IsRequired == Required::True && !op->Populated; });
+		auto missingRequired = Options | std::views::filter([](const auto& op) { return !op->IsOptional() && !op->Populated; });
+		//auto missingRequired = Options | std::views::filter([](const auto& op) { return op->IsRequired == Required::True && !op->Populated; });
 		if(!missingRequired.empty()) {
 			
 			auto missingNames = missingRequired | std::views::transform([](const auto& p) { return p->LongName; });
@@ -104,9 +105,12 @@ namespace CliParser {
 	std::string IArgs::Describe() {
 		std::stringstream stream;
 		for(const auto& option : Options) {
-			stream << (option->IsRequired == Required::True ? "[required]" : "[optional]") << " "
+			stream <<
+				(option->IsOptional() ? "[optional]" : "[required]") << " "
+			//stream << (option->IsRequired == Required::True ? "[required]" : "[optional]") << " "
 				<< option->ShortName << "|" << option->LongName << "|" << option->HelpText;
-			if(option->IsRequired == Required::False) {
+			if(option->IsOptional()) {
+			//if(option->IsRequired == Required::False) {
 				stream << "(default: " << option->GetDefaultValue() << ")";
 			}
 			stream << std::endl;

@@ -7,8 +7,10 @@
 #include <functional>
 #include <iosfwd>
 #include <vector>
+#include <optional>
 
 namespace CliParser {
+
 	using LimitedValuesFunc = std::function<std::vector<std::string>()>;
 	using NamedParams = std::vector<std::pair<std::string, std::string>>;
 	template<typename T>
@@ -18,12 +20,10 @@ namespace CliParser {
 	template<typename T>
 	using CustomValidatorFunc = std::function<bool(const T&, std::ostream&)>;
 
-	enum struct Required { True, False };
 	struct OptionWrapper {
-		OptionWrapper(char shortName, std::string_view longName, Required required, std::string_view helpText, /*const std::string& defaultValue,*/ LimitedValuesFunc limitedValues)
+		OptionWrapper(char shortName, std::string_view longName, std::string_view helpText, /*const std::string& defaultValue,*/ LimitedValuesFunc limitedValues)
 			: ShortName(shortName)
 			, LongName(longName)
-			, IsRequired(required)
 			, HelpText(helpText)
 			, LimitedValues(limitedValues)
 		{}
@@ -31,10 +31,10 @@ namespace CliParser {
 
 		virtual bool TryParse(std::string_view sv, std::ostream& outErrors) = 0;
 		virtual std::string GetDefaultValue() = 0;
+		virtual bool IsOptional() = 0;
 
 		char ShortName {' '};
 		std::string LongName {"Unset"};
-		Required IsRequired{ Required::False };
 		std::string HelpText{ "No help text" };
 		bool Populated{ false };
 		LimitedValuesFunc LimitedValues{ nullptr };
@@ -42,8 +42,8 @@ namespace CliParser {
 
 	template<typename T>
 	struct Option : public OptionWrapper {
-		Option(char shortName, std::string_view longName, Required required, std::string_view helpText, DefaultValueFunc<T> defaultValueFunc, T& backingField, ArgParseFunc<T> argParser, LimitedValuesFunc limitedValues, CustomValidatorFunc<T> customValidator)
-			: OptionWrapper(shortName, longName, required, helpText, limitedValues)
+		Option(char shortName, std::string_view longName, std::string_view helpText, DefaultValueFunc<T> defaultValueFunc, T& backingField, ArgParseFunc<T> argParser, LimitedValuesFunc limitedValues, CustomValidatorFunc<T> customValidator)
+			: OptionWrapper(shortName, longName, helpText, limitedValues)
 			, BackingField(backingField)
 			, ArgParser(argParser)
 			, CustomValidator(customValidator)
@@ -66,6 +66,10 @@ namespace CliParser {
 
 		std::string GetDefaultValue() override {
 			return DefaultValueFunc(BackingField);
+		}
+
+		bool IsOptional() override {
+			return std::is_convertible_v<std::nullopt_t, T>;
 		}
 		T& BackingField;
 		ArgParseFunc<T> ArgParser{ nullptr };
@@ -103,7 +107,6 @@ namespace CliParser {
 			IArgs& collection,
 			char shortName,
 			std::string_view longName,
-			Required required,
 			std::string_view helpText,
 			DefaultValueFunc<T> defaultValueFunc,
 			T& backingField,
@@ -113,7 +116,6 @@ namespace CliParser {
 			collection.Options.push_back(std::make_unique<Option<T>>(
 					shortName,
 					longName,
-					required,
 					helpText,
 					defaultValueFunc,
 					backingField,
@@ -125,7 +127,7 @@ namespace CliParser {
 	};
 }
 
-#define _IMPL_OPTION(_type, _short_name, _long_name, _required, _helpText, _limitedFunc, _customValidator, ...) \
+#define _IMPL_OPTION(_type, _short_name, _long_name, _helpText, _limitedFunc, _customValidator, ...) \
 public: \
 	_type _long_name{__VA_ARGS__}; \
 private: \
@@ -133,7 +135,6 @@ private: \
 		*this, \
 		_short_name, \
 		#_long_name, \
-		_required, \
 		_helpText, \
 		static_cast<CliParser::DefaultValueFunc<_type>>(CliParser::ArgParse::ToString), \
 		_long_name, \
@@ -143,6 +144,6 @@ private: \
  	}; \
 public:
 
-#define OPTION(_type, _short_name, _long_name, _required, _helpText, ...) _IMPL_OPTION(_type, _short_name, _long_name, _required, _helpText, nullptr, nullptr, __VA_ARGS__)
-#define LIMITED_OPTION(_type, _short_name, _long_name, _required, _helpText, _limitedFunc, ...) _IMPL_OPTION(_type, _short_name, _long_name, _required, _helpText, _limitedFunc, nullptr, __VA_ARGS__)
-#define VALIDATED_OPTION(_type, _short_name, _long_name, _required, _helpText, _customValidator, ...) _IMPL_OPTION(_type, _short_name, _long_name, _required, _helpText, nullptr, _customValidator, __VA_ARGS__)
+#define OPTION(_type, _short_name, _long_name, _helpText, ...) _IMPL_OPTION(_type, _short_name, _long_name, _helpText, nullptr, nullptr, __VA_ARGS__)
+#define LIMITED_OPTION(_type, _short_name, _long_name, _helpText, _limitedFunc, ...) _IMPL_OPTION(_type, _short_name, _long_name, _helpText, _limitedFunc, nullptr, __VA_ARGS__)
+#define VALIDATED_OPTION(_type, _short_name, _long_name, _helpText, _customValidator, ...) _IMPL_OPTION(_type, _short_name, _long_name, _helpText, nullptr, _customValidator, __VA_ARGS__)

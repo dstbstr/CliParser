@@ -5,6 +5,7 @@
 #include <string_view>
 #include <vector>
 #include <ranges>
+#include <optional>
 
 namespace CliParser::ArgParse {
 	constexpr auto DefaultDelimiter = ',';
@@ -40,6 +41,15 @@ namespace CliParser::ArgParse {
 		return true;
 	}
 
+	template<typename T>
+	inline bool TryParse(std::string_view sv, std::optional<T>& outResult, std::ostream& outErrors) {
+		T value;
+		if (!TryParse(sv, value, outErrors)) {
+			return false;
+		}
+		outResult = value;
+		return true;
+	}
 	template<typename T>
 	requires std::is_arithmetic_v<T>
 	std::string ToString(const T& value) {
