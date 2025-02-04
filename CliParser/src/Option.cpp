@@ -49,7 +49,7 @@ namespace CliParser {
 				for(size_t c = 1; c < arg.size(); c++) {
 					currentOption = FindOption(arg.substr(c, 1));
 					if (!currentOption) {
-						outErrors << "Unknown option: " << arg[c];
+						outErrors << "Unknown option: " << arg[c] << std::flush;
 						return false;
 					}
 					if (c < arg.size() - 1) {
@@ -61,12 +61,12 @@ namespace CliParser {
 			} else if(IsLongOption(arg)) {
 				currentOption = FindOption(GetOptionName(arg));
 				if (!currentOption) {
-					outErrors << "Unknown option: " << arg;
+					outErrors << "Unknown option: " << arg << std::flush;
 					return false;
 				}
 			} else {
 				if(!currentOption) {
-					outErrors << "Unsure which argument to provide the value: " << arg;
+					outErrors << "Unsure which argument to provide the value: " << arg << std::flush;
 					return false;
 				}
 				else if (!currentOption->TryParse(arg, outErrors)) {
@@ -75,13 +75,13 @@ namespace CliParser {
 				else if(currentOption->LimitedValues) {
 					auto limitedValues = currentOption->LimitedValues();
 					if(limitedValues.empty()) {
-						outErrors << "No valid values for this field currently";
+						outErrors << "No valid values for this field currently" << std::flush;
 						return false;
 					}
 					auto found = std::find(limitedValues.begin(), limitedValues.end(), arg);
 					if (found == limitedValues.end()) {
 						auto valuesString = std::views::join_with(limitedValues, ", ") | std::ranges::to<std::string>();
-						outErrors << arg << " in not in [" << valuesString << "]";
+						outErrors << arg << " in not in [" << valuesString << "]" << std::flush;
 						return false;
 					}
 				}
@@ -93,7 +93,7 @@ namespace CliParser {
 		auto missingRequired = Options | std::views::filter([](const auto& op) { return !op->IsOptional() && !op->Populated; });
 		if(!missingRequired.empty()) {
 			auto missingNames = missingRequired | std::views::transform([](const auto& p) { return p->LongName; });
-			outErrors << "Missing required option(s): " << (std::views::join_with(missingNames, ", ") | std::ranges::to<std::string>());
+			outErrors << "Missing required option(s): " << (std::views::join_with(missingNames, ", ") | std::ranges::to<std::string>()) << std::flush;
 			return false;
 		}
 

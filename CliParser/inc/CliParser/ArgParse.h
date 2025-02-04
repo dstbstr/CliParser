@@ -45,6 +45,7 @@ namespace CliParser::ArgParse {
 	template<typename T>
 	inline bool TryParse(std::string_view sv, std::optional<T>& outResult, std::ostream& outErrors) {
 		T value;
+		//TODO: this doesn't work with optional custom type
 		if (!TryParse(sv, value, outErrors)) {
 			return false;
 		}

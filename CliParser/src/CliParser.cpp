@@ -21,9 +21,9 @@ namespace CliParser {
 		auto& commands = GetCommands();
 		if (!commands.contains(commandName)) {
 			if(commandName.empty()) {
-				outErrors << "No command specified and default command not set";
+				outErrors << "No command specified and default command not set" << std::flush;
 			} else {
-				outErrors << "Unknown command: " << commandName;
+				outErrors << "Unknown command: " << commandName << std::flush;
 			}
 			return 1;
 		}
