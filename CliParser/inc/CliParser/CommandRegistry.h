@@ -39,9 +39,9 @@ namespace CliParser {
 #define COMMAND(_name, _argType, _argName) \
 void _name(const _argType& _argName, int& outResult); \
 CliParser::CommandRegistrar<_argType> _name##Registrar(#_name, _name); \
-void _name(const _argType& _argName, int& outResult)
+void _name(const _argType& _argName, [[maybe_unused]] int& outResult)
 
 #define DEFAULT_COMMAND(_argType, _argName) \
 void defaultCommand(const _argType& _argName, int& outResult); \
 CliParser::CommandRegistrar<_argType> defaultCommandRegistrar("", defaultCommand); \
-void defaultCommand(const _argType& _argName, int& outResult)
+void defaultCommand(const _argType& _argName, [[maybe_unused]] int& outResult)

@@ -34,6 +34,7 @@ namespace CliParser::ArgParse {
 	template<typename T>
 	inline bool TryParse(std::string_view sv, std::vector<T>& outResult, std::ostream& outErrors) {
 		T value;
+		//TODO: this doesn't work with vectors of custom types (Would need Option's ArgParser)
 		if (!TryParse(sv, value, outErrors)) {
 			return false;
 		}
@@ -64,7 +65,7 @@ namespace CliParser::ArgParse {
 	inline std::string ToString(const std::vector<T>& values) {
 		return values
 			| std::views::transform([](const T& value) { return ToString(value); })
-			| std::views::join(DefaultDelimiter)
+			| std::views::join_with(DefaultDelimiter)
 			| std::ranges::to<std::string>();
 	}
 
