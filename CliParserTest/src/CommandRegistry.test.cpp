@@ -3,12 +3,12 @@
 
 namespace CliParser {
 	struct SampleArgs : public IArgs {
-		OPTION(std::string, 's', str, Required::True, "An example string");
-		OPTION(int, 'i', num, Required::False, "An example number", 42);
+		OPTION(std::string, 's', str, "An example string");
+		OPTION(std::optional<int>, 'i', num, "An example number", 42);
 	};
 
 	COMMAND(SampleCommand, SampleArgs, args) {
-		outResult = args.num;
+		outResult = args.num.value();
 	}
 
 	TEST(CommandRegistryTest, Commands_AfterCommandMacro_IncludesSampleCommand) {

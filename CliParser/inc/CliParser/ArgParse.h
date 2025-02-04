@@ -67,4 +67,9 @@ namespace CliParser::ArgParse {
 			| std::views::join(DefaultDelimiter)
 			| std::ranges::to<std::string>();
 	}
+
+	template<typename T>
+	inline std::string ToString(const std::optional<T>&) {
+		return "Unset";
+	}
 }

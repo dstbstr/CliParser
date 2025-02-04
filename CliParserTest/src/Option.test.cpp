@@ -8,8 +8,8 @@ namespace CliParser {
 	struct ExampleArgs : public IArgs {
 		ExampleArgs() : IArgs(), str("unset"), fp(3.14f) {}
 
-		OPTION(std::string, 's', str, Required::True, "An example string");
-		OPTION(float, 'f', fp, Required::False, "An example float");
+		OPTION(std::string, 's', str, "An example string");
+		OPTION(std::optional<float>, 'f', fp, "An example float");
 	};
 
 	template<typename TArgs>
@@ -92,7 +92,7 @@ namespace CliParser {
 	}
 
 	struct EnumOption : IArgs {
-		OPTION(SomeEnum, 'e', val, Required::True, "An example enum");
+		OPTION(SomeEnum, 'e', val, "An example enum");
 	};
 
 	struct EnumTest : BaseOptionTest<EnumOption> {};
@@ -117,7 +117,7 @@ namespace CliParser {
 	}
 
 	struct ValidatedValuesOption : IArgs {
-		VALIDATED_OPTION(int, 'i', num, Required::True, "An even number", MustBeEven);
+		VALIDATED_OPTION(int, 'i', num, "An even number", MustBeEven);
 	};
 
 	struct ValidatedOptionTest : BaseOptionTest<ValidatedValuesOption> {};
@@ -137,7 +137,7 @@ namespace CliParser {
 		return { "Saturday", "Sunday" };
 	}
 	struct LimitedValuesOption : IArgs {
-		LIMITED_OPTION(std::string, 'd', day, Required::True, "A day of the week", Weekends);
+		LIMITED_OPTION(std::string, 'd', day, "A day of the week", Weekends);
 	};
 	struct LimitedOptionTest : BaseOptionTest<LimitedValuesOption> {};
 
@@ -153,7 +153,7 @@ namespace CliParser {
 	}
 
 	struct DefaultValuesOption : IArgs {
-		OPTION(int, 'i', num, Required::False, "An integer", 42);
+		OPTION(std::optional<int>, 'i', num, "An integer", 42);
 	};
 	struct DefaultOptionTest : BaseOptionTest<DefaultValuesOption> {};
 	TEST_F(DefaultOptionTest, TryParse_WithNoValue_ReturnsTrue) {

@@ -9,17 +9,17 @@ namespace CliParser {
 	struct EmptyArgs : IArgs {};
 
 	struct Command1Args : IArgs {
-		OPTION(std::string, 's', str, Required::True, "An example string");
-		OPTION(int, 'i', num, Required::False, "An example number", 42);
+		OPTION(std::string, 's', str, "An example string");
+		OPTION(std::optional<int>, 'i', num, "An example number", 42);
 	};
 
 	struct Command2Args : IArgs {
-		OPTION(float, 'f', fp, Required::True, "An example float");
-		OPTION(char, 'c', character, Required::False, "An example character", 'a');
+		OPTION(float, 'f', fp, "An example float");
+		OPTION(std::optional<char>, 'c', character, "An example character", 'a');
 	};
 
 	struct DefaultArgs : IArgs {
-		OPTION(int, 'r', result, Required::True, "The result of the command", 0);
+		OPTION(int, 'r', result, "The result of the command", 0);
 	};
 
 	COMMAND(Command1, Command1Args, args) {
@@ -28,7 +28,9 @@ namespace CliParser {
 		}
 	}
 	COMMAND(Command2, Command2Args, args) {
-		outResult = static_cast<int>(args.character);
+		outResult = args.character.has_value() 
+			? static_cast<int>(*args.character) 
+			: 0;
 	}
 	COMMAND(EmptyCommand, EmptyArgs, args) {
 		outResult = 42;
