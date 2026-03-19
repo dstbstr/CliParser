@@ -52,11 +52,21 @@ namespace CliParser {
 						outErrors << "Unknown option: " << arg[c] << std::flush;
 						return false;
 					}
+					if (currentOption->IsFlag()) {
+						if (!currentOption->TryParse("true", outErrors)) return false;
+						currentOption->Populated = true;
+						currentOption = nullptr; // reset to avoid multiple values for one name
+					}
+					/*
 					if (c < arg.size() - 1) {
 						// short arguments that are combined are assumed to be flags
 						// the last short argument (or a short by itself) can have a value
 						if (!currentOption->TryParse("true", outErrors)) return false;
+						currentOption->Populated = true;
 					}
+					else if (currentOption->IsFlag()) {
+					}
+					*/
 				}
 			} else if(IsLongOption(arg)) {
 				currentOption = FindOption(GetOptionName(arg));

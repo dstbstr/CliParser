@@ -161,4 +161,31 @@ namespace CliParser {
 		AssertSuccess();
 		ASSERT_EQ(Args.num, 42);
 	}
+
+	struct FlagOptions : IArgs {
+		OPTION(bool, 'r', RequiredValue, "Required Flag");
+		OPTION(std::optional<bool>, 'o', OptionalValue, "Optional Flag");
+	};
+
+	struct FlagOptionsTest : BaseOptionTest<FlagOptions> {};
+	TEST_F(FlagOptionsTest, TryParse_WithBothFlags_ReturnsTrue) {
+		MakeArgs("-ro");
+		AssertSuccess();
+		ASSERT_TRUE(Args.RequiredValue);
+		ASSERT_TRUE(Args.OptionalValue.value());
+	}
+
+	TEST_F(FlagOptionsTest, TryParse_WithSeparatedFlags_ReturnsTrue) {
+		MakeArgs("-r -o");
+		AssertSuccess();
+		ASSERT_TRUE(Args.RequiredValue);
+		ASSERT_TRUE(Args.OptionalValue.value());
+	}
+
+	TEST_F(FlagOptionsTest, TryParse_WithOnlyRequired_ReturnsTrue) {
+		MakeArgs("-r");
+		AssertSuccess();
+		ASSERT_TRUE(Args.RequiredValue);
+		ASSERT_FALSE(Args.OptionalValue.has_value());
+	}
 }

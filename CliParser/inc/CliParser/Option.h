@@ -32,6 +32,7 @@ namespace CliParser {
 		virtual bool TryParse(std::string_view sv, std::ostream& outErrors) = 0;
 		virtual std::string GetDefaultValue() = 0;
 		virtual bool IsOptional() = 0;
+		virtual bool IsFlag() = 0;
 
 		char ShortName {' '};
 		std::string LongName {"Unset"};
@@ -70,6 +71,9 @@ namespace CliParser {
 
 		bool IsOptional() override {
 			return std::is_convertible_v<std::nullopt_t, T>;
+		}
+		bool IsFlag() override {
+			return std::is_same_v<T, bool> || std::is_same_v<T, std::optional<bool>>;
 		}
 		T& BackingField;
 		ArgParseFunc<T> ArgParser{ nullptr };
