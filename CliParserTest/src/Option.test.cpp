@@ -188,4 +188,18 @@ namespace CliParser {
 		ASSERT_TRUE(Args.RequiredValue);
 		ASSERT_FALSE(Args.OptionalValue.has_value());
 	}
+
+	struct VectorOptions : IArgs {
+		OPTION(std::vector<int>, 'n', Numbers, "A list of numbers");
+	};
+	struct VectorOptionsTest : BaseOptionTest<VectorOptions> {};
+
+	TEST_F(VectorOptionsTest, TryParse_WithMultipleValues_ReturnsTrue) {
+		MakeArgs("-n 1 -n 2 -n 3");
+		AssertSuccess();
+		ASSERT_EQ(Args.Numbers.size(), 3);
+		ASSERT_EQ(Args.Numbers[0], 1);
+		ASSERT_EQ(Args.Numbers[1], 2);
+		ASSERT_EQ(Args.Numbers[2], 3);
+	}
 }
