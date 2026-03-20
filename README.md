@@ -33,6 +33,9 @@ DEFAULT_COMMAND(MyArgs, args) {
 	std::cout << "Input: " << args.Input << std::endl;
 	std::cout << "Output: " << args.Output.value_or("Not provided") << std::endl;
 }
+
+// Preventing the linker from stripping out symbols
+void InitializeCommands() {}
 ```
 
 ## Options
